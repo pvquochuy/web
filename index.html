@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="vi" dir="ltr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vision – Hỗ trợ Mù màu</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+
+<body class="theme-light">
+  <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Mở menu"> ☰ </button>
+  <a href="#main-content" class="skip-link">Bỏ qua đến nội dung chính</a>
+
+  <!-- SVG Filters -->
+  <svg class="cb-filters" aria-hidden="true">
+    <defs>
+      <filter id="f-protanopia">
+        <feColorMatrix type="matrix" values="0.567 0.433 0 0 0  0.558 0.442 0 0 0  0 0.242 0.758 0 0  0 0 0 1 0" />
+      </filter>
+      <filter id="f-deuteranopia">
+        <feColorMatrix type="matrix" values="0.625 0.375 0 0 0  0.700 0.300 0 0 0  0 0.300 0.700 0 0  0 0 0 1 0" />
+      </filter>
+      <filter id="f-tritanopia">
+        <feColorMatrix type="matrix" values="0.950 0.050 0 0 0  0 0.433 0.567 0 0  0 0.475 0.525 0 0  0 0 0 1 0" />
+      </filter>
+    </defs>
+  </svg>
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar" class="sidebar" aria-label="Điều hướng chính">
+    <div class="sidebar-logo">
+      <span class="logo-icon" aria-hidden="true">👁️‍🗨️</span>
+      <div>
+        <span class="logo-name">Vision SP</span>
+        <span class="logo-tagline">Hỗ trợ người mù màu</span>
+      </div>
+    </div>
+    <ul class="nav-list" role="list">
+      <li><a href="#" class="nav-link active" data-page="home"><span>🏠</span><span>Trang chủ</span></a></li>
+      <li><a href="#" class="nav-link" data-page="camera"><span>📷</span><span>Camera Trực tiếp</span></a></li>
+      <li><a href="#" class="nav-link" data-page="filereader"><span>📂</span><span>Đọc File / Truyện</span></a></li>
+      <li><a href="#" class="nav-link" data-page="library"><span>📚</span><span>Thư viện</span></a></li>
+      <li><a href="#" class="nav-link" data-page="weblens"><span>🔍</span><span>Ống kính Web</span></a></li>
+    </ul>
+    <button id="btn-open-settings" class="settings-toggle" aria-label="Mở cài đặt" aria-expanded="false">
+      <span>⚙️</span><span>Cài đặt</span>
+    </button>
+  </nav>
+
+  <!-- SETTINGS PANEL -->
+  <aside id="settings-panel" class="settings-panel" role="complementary" aria-hidden="true">
+    <div class="settings-header">
+      <h2>Cài đặt</h2>
+      <button id="btn-close-settings" class="btn-icon" aria-label="Đóng">✕</button>
+    </div>
+    <div class="settings-body">
+      <section class="settings-section">
+        <h3>Bộ lọc toàn trang</h3>
+        <div class="radio-group" role="radiogroup">
+          <label class="radio-row"><input type="radio" name="cb-global" value="none" checked /><span>Bình
+              thường</span></label>
+          <label class="radio-row"><input type="radio" name="cb-global" value="protanopia" /><span>Protanopia (mù
+              đỏ)</span></label>
+          <label class="radio-row"><input type="radio" name="cb-global" value="deuteranopia" /><span>Deuteranopia (mù
+              xanh lá)</span></label>
+          <label class="radio-row"><input type="radio" name="cb-global" value="tritanopia" /><span>Tritanopia (mù xanh
+              lam)</span></label>
+        </div>
+      </section>
+      <section class="settings-section">
+        <h3>Hiển thị</h3>
+        <label class="toggle-row" for="toggle-dark"><span>🌙 Dark Mode</span><input type="checkbox" id="toggle-dark"
+            role="switch" /><span class="toggle-slider"></span></label>
+        <label class="toggle-row" for="toggle-hc"><span>🔆 Tương phản cao</span><input type="checkbox" id="toggle-hc"
+            role="switch" /><span class="toggle-slider"></span></label>
+        <label class="toggle-row" for="toggle-lf"><span>🔡 Chữ lớn</span><input type="checkbox" id="toggle-lf"
+            role="switch" /><span class="toggle-slider"></span></label>
+      </section>
+      <div class="settings-section">
+        <h3>TÀI KHOẢN</h3>
+        <input type="text" id="username" placeholder="Tên đăng nhập" class="account-input">
+        <input type="password" id="password" placeholder="Mật khẩu" class="account-input">
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button class="btn-primary" onclick="registerUser()">
+            Đăng ký
+          </button>
+
+          <button class="btn-outline" onclick="loginUser()">
+            Đăng nhập
+          </button>
+          <button class="btn-outline" onclick="logoutUser()">
+            Đăng xuất
+          </button>
+        </div>
+
+        <p id="login-status"></p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main id="main-content" class="main-content" tabindex="-1">
+
+    <!-- HOME -->
+    <section id="section-home" class="page-section active" aria-labelledby="home-title">
+      <div class="hero-banner">
+        <div class="hero-text">
+          <div class="hero-badge">🎨 Chuyên biệt cho người mù màu</div>
+          <h1 id="home-title" class="hero-title">Nhìn thế giới<br /><span class="hero-accent">đúng như bạn muốn</span>
+          </h1>
+          <p class="hero-desc">Camera realtime, đọc ảnh/truyện/PDF, lưu thư viện, và ống kính lọc màu khi lướt web.</p>
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="navigateTo('camera')">📷 Mở Camera</button>
+            <button class="btn-outline" onclick="navigateTo('filereader')">📂 Đọc File</button>
+            <button class="btn-outline" onclick="navigateTo('weblens')">🔍 Ống kính Web</button>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="orb orb-red"></div>
+          <div class="orb orb-green"></div>
+          <div class="orb orb-blue"></div>
+          <div class="orb-eye">👁️</div>
+        </div>
+      </div>
+      <div class="section-header">
+        <h2>Tính năng</h2>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card" tabindex="0">
+          <div class="feature-icon">📷</div>
+          <h3>Camera Realtime</h3>
+          <p>Bộ lọc mù màu áp dụng trực tiếp lên luồng camera. Chụp và tải xuống.</p>
+          <button class="feature-cta" onclick="navigateTo('camera')">Thử ngay →</button>
+        </article>
+        <article class="feature-card" tabindex="0">
+          <div class="feature-icon">📂</div>
+          <h3>Đọc File & Truyện</h3>
+          <p>Upload ảnh hoặc PDF, áp dụng bộ lọc màu, lưu vào thư viện để đọc tiếp.</p>
+          <button class="feature-cta" onclick="navigateTo('filereader')">Thử ngay →</button>
+        </article>
+        <article class="feature-card" tabindex="0">
+          <div class="feature-icon">📚</div>
+          <h3>Thư viện lưu trữ</h3>
+          <p>File đã upload được lưu tự động. Mở lại, tiếp tục từ trang cuối đọc.</p>
+          <button class="feature-cta" onclick="navigateTo('library')">Xem thư viện →</button>
+        </article>
+        <article class="feature-card" tabindex="0">
+          <div class="feature-icon">🔍</div>
+          <h3>Ống kính Web</h3>
+          <p>Nhập URL trang web truyện tranh, áp dụng bộ lọc màu trực tiếp. Camera PiP tích hợp.</p>
+          <button class="feature-cta" onclick="navigateTo('weblens')">Thử ngay →</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- CAMERA -->
+    <section id="section-camera" class="page-section" aria-labelledby="cam-title" hidden>
+      <div class="section-header">
+        <h2 id="cam-title">📷 Camera Thời gian thực</h2>
+        <p>Bộ lọc mù màu áp dụng lên từng frame camera</p>
+      </div>
+      <div class="camera-toolbar">
+        <div class="mode-pills" role="radiogroup" aria-label="Chế độ lọc">
+          <label class="pill-label"><input type="radio" name="cam-mode" value="none" checked />Gốc</label>
+          <label class="pill-label"><input type="radio" name="cam-mode" value="protanopia" />Protanopia</label>
+          <label class="pill-label"><input type="radio" name="cam-mode" value="deuteranopia" />Deuteranopia</label>
+          <label class="pill-label"><input type="radio" name="cam-mode" value="tritanopia" />Tritanopia</label>
+        </div>
+        <div class="cam-btn-group">
+          <button id="btn-start-camera" class="btn-primary">📷 Bật Camera</button>
+          <button id="btn-capture" class="btn-outline" disabled>📸 Chụp</button>
+          <button id="btn-download-capture" class="btn-outline" disabled>⬇️ Tải xuống</button>
+          <button id="btn-flip-camera" class="btn-outline" disabled>🔄 Đổi cam</button>
+        </div>
+      </div>
+      <div class="camera-view">
+        <div class="camera-placeholder" id="camera-placeholder">
+          <span style="font-size:4rem">📷</span>
+          <p>Nhấn <strong>Bật Camera</strong> để bắt đầu</p>
+        </div>
+        <video id="cam-video" autoplay playsinline muted hidden></video>
+        <canvas id="cam-canvas" hidden></canvas>
+      </div>
+      <canvas id="cam-capture-canvas" style="display:none"></canvas>
+      <div class="quick-controls">
+        <div class="slider-row"><label for="cam-brightness">☀️ Độ sáng: <span
+              id="cam-brightness-val">0</span></label><input type="range" id="cam-brightness" min="-100" max="100"
+            value="0" /></div>
+        <div class="slider-row"><label for="cam-contrast">🔲 Tương phản: <span
+              id="cam-contrast-val">0</span></label><input type="range" id="cam-contrast" min="-100" max="100"
+            value="0" /></div>
+        <div class="slider-row"><label for="cam-intensity">🎨 Cường độ: <span
+              id="cam-intensity-val">100</span>%</label><input type="range" id="cam-intensity" min="0" max="100"
+            value="100" /></div>
+      </div>
+      <div id="capture-preview" class="capture-preview" hidden>
+        <h3>📸 Ảnh vừa chụp</h3>
+        <canvas id="preview-canvas"></canvas>
+      </div>
+    </section>
+
+    <!-- FILE READER -->
+    <section id="section-filereader" class="page-section" aria-labelledby="file-title" hidden>
+      <div class="section-header">
+        <h2 id="file-title">📂 Đọc File / Truyện Tranh</h2>
+        <p>Upload ảnh hoặc PDF · Bộ lọc màu realtime · Lưu tự động vào thư viện</p>
+      </div>
+      <div id="file-upload-area" class="upload-area">
+        <div id="file-dropzone" class="upload-dropzone" tabindex="0" role="button"
+          aria-label="Kéo thả ảnh hoặc PDF, hoặc nhấn để chọn file">
+          <div class="dropzone-icon">📂</div>
+          <p class="dropzone-main">Kéo thả ảnh hoặc PDF vào đây</p>
+          <p class="dropzone-sub">JPG · PNG · WebP · PDF · Manga · Comic</p>
+          <input type="file" id="file-input-reader" accept="image/*,.pdf" class="sr-only" />
+        </div>
+        <div class="upload-hints">
+          <span class="hint-tag">📚 Manga/Manhwa</span>
+          <span class="hint-tag">📄 PDF nhiều trang</span>
+          <span class="hint-tag">🖼️ Ảnh thông thường</span>
+          <span class="hint-tag">💾 Tự lưu thư viện</span>
+        </div>
+      </div>
+
+      <div id="file-reader-panel" class="file-reader-panel" hidden>
+        <div class="reader-toolbar">
+          <div class="mode-pills" role="radiogroup">
+            <label class="pill-label"><input type="radio" name="file-mode" value="none" checked />Gốc</label>
+            <label class="pill-label"><input type="radio" name="file-mode" value="protanopia" />Protanopia</label>
+            <label class="pill-label"><input type="radio" name="file-mode" value="deuteranopia" />Deuteranopia</label>
+            <label class="pill-label"><input type="radio" name="file-mode" value="tritanopia" />Tritanopia</label>
+          </div>
+          <label class="manga-toggle" for="toggle-manga">
+            <input type="checkbox" id="toggle-manga" /><span>📚 Manga Mode</span>
+          </label>
+          <!-- Toggle so sánh -->
+          <label class="manga-toggle" for="toggle-compare" title="Hiện ảnh gốc để so sánh">
+            <input type="checkbox" id="toggle-compare" /><span>👁 Xem gốc</span>
+          </label>
+          <div class="zoom-controls">
+            <button id="btn-zoom-out" class="btn-icon" aria-label="Thu nhỏ">−</button>
+            <span id="zoom-label">100%</span>
+            <button id="btn-zoom-in" class="btn-icon" aria-label="Phóng to">+</button>
+            <button id="btn-zoom-fit" class="btn-icon" title="Vừa khung">⊡</button>
+          </div>
+          <div class="reader-actions">
+            <button id="btn-download-file" class="btn-primary">⬇️ Tải xuống</button>
+            <button id="btn-reset-file" class="btn-outline">🔄 File mới</button>
+          </div>
+        </div>
+
+        <div id="pdf-nav" class="pdf-nav" hidden>
+          <button id="btn-prev-page" class="btn-icon">◀</button>
+          <span id="page-info" aria-live="polite">Trang 1 / 1</span>
+          <button id="btn-next-page" class="btn-icon">▶</button>
+        </div>
+
+        <div class="quick-controls">
+          <div class="slider-row"><label for="file-brightness">☀️ Độ sáng: <span
+                id="file-brightness-val">0</span></label><input type="range" id="file-brightness" min="-100" max="100"
+              value="0" /></div>
+          <div class="slider-row"><label for="file-contrast">🔲 Tương phản: <span
+                id="file-contrast-val">0</span></label><input type="range" id="file-contrast" min="-100" max="100"
+              value="0" /></div>
+          <div class="slider-row"><label for="file-intensity">🎨 Cường độ: <span
+                id="file-intensity-val">100</span>%</label><input type="range" id="file-intensity" min="0" max="100"
+              value="100" /></div>
+        </div>
+
+        <!-- Single canvas view (processed only) -->
+        <div class="single-view" id="single-view">
+          <div class="canvas-scroll-wrap" id="canvas-scroll-wrap">
+            <canvas id="canvas-processed" aria-label="Ảnh đã xử lý"></canvas>
+            <!-- Original overlay shown when toggle-compare is ON -->
+            <canvas id="canvas-original" class="original-overlay" aria-label="Ảnh gốc" hidden></canvas>
+          </div>
+        </div>
+
+        <div id="cb-info-box" class="cb-info-box" role="status" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section id="section-library" class="page-section" aria-labelledby="lib-title" hidden>
+      <div class="section-header">
+        <h2 id="lib-title">📚 Thư viện</h2>
+        <p>File đã upload được lưu tự động – mở lại đọc tiếp bất cứ lúc nào</p>
+      </div>
+      <div class="lib-toolbar">
+        <button id="btn-clear-library" class="btn-outline" style="margin-left:auto">🗑️ Xóa tất cả</button>
+      </div>
+      <div id="library-grid" class="library-grid" role="list" aria-label="Danh sách file đã lưu">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- WEB LENS -->
+    <section id="section-weblens" class="page-section" aria-labelledby="lens-title" hidden>
+      <div class="section-header">
+        <h2 id="lens-title">🔍 Ống kính Web</h2>
+        <p>Nhập URL trang web – bộ lọc màu áp dụng trực tiếp lên nội dung</p>
+      </div>
+      <div class="lens-search-bar">
+        <input id="lens-search" type="text" class="lens-input"
+          placeholder="🔎 Tìm tên truyện... (ví dụ: Naruto, One Piece)" />
+        <div class="search-site-btns">
+          <button class="search-site-btn" data-search="https://nettruyen18.com/">NetTruyện</button>
+          <button class="search-site-btn" data-search="https://truyenggvn.com/">TruyenQQ</button>
+          <button class="search-site-btn" data-search="https://www.google.com/search?q={q}+truyện+tranh"
+            data-newtab="1">Google ↗</button>
+        </div>
+      </div>
+      <div class="lens-bar">
+        <input id="lens-url" type="url" class="lens-input" placeholder="https://example.com/truyen-tranh..."
+          aria-label="Nhập URL trang web" />
+        <button id="btn-load-url" class="btn-primary">🔍 Tải trang</button>
+      </div>
+
+      <div class="lens-controls">
+        <div class="mode-pills" role="radiogroup" aria-label="Bộ lọc màu cho trang web">
+          <label class="pill-label"><input type="radio" name="lens-mode" value="none" checked />Gốc</label>
+          <label class="pill-label"><input type="radio" name="lens-mode" value="protanopia" />Protanopia</label>
+          <label class="pill-label"><input type="radio" name="lens-mode" value="deuteranopia" />Deuteranopia</label>
+          <label class="pill-label"><input type="radio" name="lens-mode" value="tritanopia" />Tritanopia</label>
+        </div>
+        <button id="btn-cam-pip" class="btn-outline">📷 Camera PiP</button>
+        <div class="lens-zoom">
+          <button id="btn-lens-zoom-out" class="btn-icon">−</button>
+          <span id="lens-zoom-label">100%</span>
+          <button id="btn-lens-zoom-in" class="btn-icon">+</button>
+        </div>
+      </div>
+
+      <div class="iframe-wrapper" id="iframe-wrapper">
+        <div class="iframe-placeholder" id="iframe-placeholder">
+          <span style="font-size:3.5rem">🔍</span>
+          <p>Nhập URL ở trên để tải trang web</p>
+          <p style="font-size:.8rem;opacity:.65;margin-top:.35rem">Lưu ý: một số trang chặn nhúng iframe</p>
+        </div>
+        <iframe id="web-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" allow="autoplay"
+          title="Trình duyệt web tích hợp" hidden></iframe>
+
+        <!-- Camera PiP -->
+        <div id="cam-pip" class="cam-pip" hidden aria-label="Camera PiP – có thể kéo di chuyển">
+          <div class="pip-header" id="pip-header">
+            <span>📷 Camera</span>
+            <button id="btn-close-pip" class="btn-icon" style="width:24px;height:24px;font-size:.7rem">✕</button>
+          </div>
+          <video id="pip-video" autoplay playsinline muted aria-label="Camera PiP"></video>
+          <canvas id="pip-canvas" aria-label="Camera với bộ lọc màu"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-hidden="true"></div>
+  <script src="script.js"></script>
+</body>
+
+</html>
